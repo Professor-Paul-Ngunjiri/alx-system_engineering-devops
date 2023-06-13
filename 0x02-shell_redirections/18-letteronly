@@ -1,2 +1,2 @@
-18-letteronly
-grep "^[A-Za-z]" /etc/ssh/sshd_config
+#!/bin/bash
+grep -i "^[a-z]" /etc/ssh/sshd_config
