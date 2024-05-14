@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Use ss to gather the information, as it is more modern and preferred over netstat
+sudo ss -tulnps | awk '
+BEGIN {
+    print "Active Internet connections (only servers)"
+    printf "%-5s %-7s %-7s %-22s %-22s %-12s %s\n", "Proto", "Recv-Q", "Send-Q", "Local Address", "Foreign Address", "State", "PID/Program name"
+}
+/^tcp|^udp/ {
+    proto = $1
+    recv_q = $2
+    send_q = $3
+    local_address = $4
+    foreign_address = $5
+    state = $6
+    pid_program = $7
+    split(pid_program, a, ",")
+    split(a[1], b, "=")
+    pid = b[2]
+    cmd = "ps -p " pid " -o comm="
+    cmd | getline program
+    close(cmd)
+    printf "%-5s %-7s %-7s %-22s %-22s %-12s %s\n", proto, recv_q, send_q, local_address, foreign_address, state, pid "/" program
+}
+'
+
+echo "Active UNIX domain sockets (only servers)"
+printf "%-5s %-7s %-10s %-12s %-8s %-8s %s\n" "Proto" "RefCnt" "Flags" "Type" "State" "PID/Program name" "Path"
+sudo ss -xl | awk '
+BEGIN {
+    OFS=" "
+}
+/^u_str/ {
+    proto = $1
+    refcnt = $2
+    flags = $3
+    type = $4
+    state = $5
+    inode = $6
+    pid_program = $7
+    path = $8
+    split(pid_program, a, "=")
+    pid = a[2]
+    cmd = "ps -p " pid " -o comm="
+    cmd | getline program
+    close(cmd)
+    printf "%-5s %-7s %-10s %-12s %-8s %-8s %s\n", proto, refcnt, flags, type, state, pid "/" program, path
+}
+'
