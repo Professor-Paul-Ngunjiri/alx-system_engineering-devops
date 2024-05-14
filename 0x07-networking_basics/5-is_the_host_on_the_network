@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script pings an IP address passed as an argument 5 times and displays the results.
 
 # Check if an argument is provided
 if [ $# -eq 0 ]; then
